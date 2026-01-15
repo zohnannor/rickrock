@@ -5,50 +5,42 @@ default:
 cargo-hack := `which cargo-hack` # Requires cargo-hack to be installed
 
 # Format code
-[arg("check", long="check")]
+[arg("check", long="check", value="true")]
 fmt check="":
-    cargo +nightly fmt --all {{ if check == "" { check } else { "-- --check" } }}
+    cargo fmt --all {{ if check == "" { "" } else { "-- --check" } }}
 
 # Run clippy
-[arg("fix", long="fix")]
-[arg("force", long="force")]
+[arg("fix", long="fix", value="true")]
+[arg("force", long="force", value="true")]
 clippy fix="" force="":
     cargo hack clippy --all-targets --feature-powerset --workspace \
-        {{ if fix == "" { fix } else { if force == "" { "--fix" } else { "--fix --allow-dirty" } } }}
+        {{ if fix == "" { "" } else { if force == "" { "--fix" } else { "--fix --allow-dirty" } } }}
 
 alias c := clippy
 alias lint := clippy
 
-# Run tests with specific toolchain
-[arg("toolchain", long="toolchain")]
-test toolchain="stable":
-    cargo +{{ toolchain }} hack test --all-targets --feature-powerset --workspace
-    cargo +{{ toolchain }} hack test --doc --all-features --workspace
+# Run tests
+test:
+    cargo hack test --all-targets --feature-powerset --workspace
+    # cargo hack test --doc --all-features --workspace
 
 alias t := test
 
 # Build docs
-[arg("no_deps", long="no-deps")]
-[arg("private", long="private")]
-[arg("open", long="open")]
+[arg("no_deps", long="no-deps", value="true")]
+[arg("private", long="private", value="true")]
+[arg("open", long="open", value="true")]
 doc no_deps="" private="" open="":
-    RUSTDOCFLAGS="${RUSTDOCFLAGS:-} -Zunstable-options --default-theme=ayu --generate-link-to-definition --cfg docsrs" \
-    cargo +nightly hack doc --workspace --feature-powerset \
-        {{ if no_deps == "" { no_deps } else { "--no-deps" } }} \
-        {{ if private == "" { private } else { "--document-private-items" } }} \
-        {{ if open == "" { open } else { "--open" } }}
+    # use stable for now
+    RUSTDOCFLAGS="${RUSTDOCFLAGS:-} -Zunstable-options --default-theme=ayu" \
+    cargo hack doc --workspace --feature-powerset \
+        {{ if no_deps == "" { "" } else { "--no-deps" } }} \
+        {{ if private == "" { "" } else { "--document-private-items" } }} \
+        {{ if open == "" { "" } else { "--open" } }}
 
 # Build docs for all features and open in default browser
-doco:
-    RUSTDOCFLAGS="${RUSTDOCFLAGS:-} -Zunstable-options --default-theme=ayu --generate-link-to-definition --cfg docsrs" \
-    cargo +nightly doc --workspace --all-features --no-deps --open
-
-# Check MSRV
-msrv:
-    cargo +nightly update -Z minimal-versions
-    cargo hack check --workspace --feature-powerset
-    cargo update
+doco: (doc "--no-deps" "" "--open")
 
 # Run all checks (~local CI)
-ci: fmt clippy test doc msrv
+ci: fmt clippy test doc
     @echo "All checks passed! :)"

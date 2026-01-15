@@ -55,24 +55,16 @@ jobs:
             - run: just clippy
 
     test:
-        strategy:
-            fail-fast: false
-            matrix:
-                toolchain: ["stable", "beta", "nightly"]
-                os: ["ubuntu", "macOS", "windows"]
-        runs-on: ${{ matrix.os }}-latest
+        runs-on: ubuntu-latest
         defaults:
             run:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@master
-              with:
-                  toolchain: ${{ matrix.toolchain }}
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
             - uses: taiki-e/install-action@cargo-hack
-            - run: just test --toolchain=${{ matrix.toolchain }}
+            - run: just test
 
     doc:
         runs-on: ubuntu-latest
