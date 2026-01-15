@@ -30,9 +30,8 @@ jobs:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@stable
+            - uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly
                   components: rustfmt
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
@@ -47,9 +46,8 @@ jobs:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@stable
+            - uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: stable
                   components: clippy
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
@@ -68,7 +66,7 @@ jobs:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@stable
+            - uses: dtolnay/rust-toolchain@master
               with:
                   toolchain: ${{ matrix.toolchain }}
             - uses: Swatinem/rust-cache@v2
@@ -83,9 +81,8 @@ jobs:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@stable
+            - uses: dtolnay/rust-toolchain@nightly
               with:
-                  toolchain: nightly
                   components: rust-docs
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
