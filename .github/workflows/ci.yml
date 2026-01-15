@@ -1,5 +1,3 @@
-# https://github.com/jonhoo/rust-ci-conf/tree/main/.github/workflows
-
 name: CI
 
 on:
@@ -36,6 +34,7 @@ jobs:
               run: rustup component add rustfmt
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
+              # not used, but required in justfile
             - uses: taiki-e/install-action@cargo-hack
             - run: just fmt --check
 
@@ -55,8 +54,24 @@ jobs:
             - uses: taiki-e/install-action@cargo-hack
             - run: just clippy
 
+    test:
+        runs-on: ubuntu-latest
+        needs: [fmt, clippy]
+        defaults:
+            run:
+                working-directory: backend
+        steps:
+            - uses: actions/checkout@v4
+            - name: Install pinned toolchain
+              run: rustup toolchain install
+            - uses: Swatinem/rust-cache@v2
+            - uses: taiki-e/install-action@just
+            - uses: taiki-e/install-action@cargo-hack
+            - run: just test
+
     doc:
         runs-on: ubuntu-latest
+        needs: [fmt, clippy]
         defaults:
             run:
                 working-directory: backend
@@ -70,3 +85,16 @@ jobs:
             - uses: taiki-e/install-action@just
             - uses: taiki-e/install-action@cargo-hack
             - run: just doc --private
+
+    build:
+        runs-on: ubuntu-latest
+        needs: [fmt, clippy]
+        defaults:
+            run:
+                working-directory: backend
+        steps:
+            - uses: actions/checkout@v4
+            - name: Install pinned toolchain
+              run: rustup toolchain install
+            - uses: Swatinem/rust-cache@v2
+            - run: cargo build
