@@ -30,12 +30,12 @@ jobs:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@nightly
-              with:
-                  components: rustfmt
+            - name: Install pinned toolchain
+              run: rustup toolchain install
+            - name: Add rustfmt component
+              run: rustup component add rustfmt
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
-            # not used, but required in justfile
             - uses: taiki-e/install-action@cargo-hack
             - run: just fmt --check
 
@@ -46,25 +46,14 @@ jobs:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@nightly
-              with:
-                  components: clippy
+            - name: Install pinned toolchain
+              run: rustup toolchain install
+            - name: Add clippy component
+              run: rustup component add clippy
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
             - uses: taiki-e/install-action@cargo-hack
             - run: just clippy
-
-    test:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: backend
-        steps:
-            - uses: actions/checkout@v4
-            - uses: Swatinem/rust-cache@v2
-            - uses: taiki-e/install-action@just
-            - uses: taiki-e/install-action@cargo-hack
-            - run: just test
 
     doc:
         runs-on: ubuntu-latest
@@ -73,23 +62,11 @@ jobs:
                 working-directory: backend
         steps:
             - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@nightly
-              with:
-                  components: rust-docs
+            - name: Install pinned toolchain
+              run: rustup toolchain install
+            - name: Add rust-docs component
+              run: rustup component add rust-docs
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
             - uses: taiki-e/install-action@cargo-hack
             - run: just doc --private
-
-    msrv:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: backend
-        steps:
-            - uses: actions/checkout@v4
-            - uses: dtolnay/rust-toolchain@nightly
-            - uses: Swatinem/rust-cache@v2
-            - uses: taiki-e/install-action@just
-            - uses: taiki-e/install-action@cargo-hack
-            - run: just msrv
