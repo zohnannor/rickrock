@@ -12,12 +12,56 @@ fmt check="":
 # Run clippy
 [arg("fix", long="fix", value="true")]
 [arg("force", long="force", value="true")]
-clippy fix="" force="":
-    cargo hack clippy --all-targets --feature-powerset --workspace \
-        {{ if fix == "" { "" } else { if force == "" { "--fix" } else { "--fix --allow-dirty" } } }}
+[arg("hack", long="hack", value="true")]
+[arg("meta", long="meta", value="true")]
+[arg("extra", long="extra", value="true")]
+[arg("docs", long="docs", value="true")]
+clippy fix="" force="" hack="" extra="" meta="" docs="":
+    cargo {{ if hack == "" { "" } else { "hack" } }} clippy \
+        {{ if hack == "" { "--all-features" } else { "--feature-powerset" } }} \
+        --all-targets --workspace \
+        {{ if fix == "" { "" } else {
+            if force == "" { "--fix" } else { "--fix --allow-dirty" }
+        } }} \
+        -- \
+        {{ if extra == "" {
+            "-Aclippy::all -Aclippy::pedantic -Aclippy::nursery"
+        } else {
+            "-Wclippy::all -Wclippy::pedantic -Wclippy::nursery"
+        } }} \
+        {{ if meta == "" {
+            "-Arustdoc::all -Aclippy::cargo"
+        } else {
+            "-Wrustdoc::all -Wclippy::cargo"
+        } }} \
+        {{ if docs == "" {
+            "\
+-Aclippy::doc_broken_link \
+-Aclippy::doc_comment_double_space_linebreaks \
+-Aclippy::doc_include_without_cfg \
+-Aclippy::doc_link_code \
+-Aclippy::doc_link_with_quotes \
+-Aclippy::doc_markdown \
+-Aclippy::missing_docs_in_private_items \
+-Aclippy::missing_errors_doc \
+-Aclippy::missing_panics_doc \
+-Aclippy::too_long_first_doc_paragraph \
+-Aclippy::undocumented_unsafe_blocks \
+-Aclippy::unnecessary_safety_doc \
+-Amissing_docs \
+-Arustdoc::broken_intra_doc_links \
+-Arustdoc::missing_crate_level_docs \
+-Arustdoc::missing_doc_code_examples \
+-Arustdoc::private_doc_tests \
+-Arustdoc::private_intra_doc_links"
+        } else {
+            ""
+        } }}
 
 alias c := clippy
-alias lint := clippy
+
+# Run clippy with all lints
+lint: (clippy "" "" "y" "y" "y" "y")
 
 # Run tests
 test:
@@ -31,16 +75,20 @@ alias t := test
 [arg("private", long="private", value="true")]
 [arg("open", long="open", value="true")]
 doc no_deps="" private="" open="":
-    # use stable for now
-    RUSTDOCFLAGS="${RUSTDOCFLAGS:-} -Zunstable-options --default-theme=ayu" \
+    RUSTDOCFLAGS="${RUSTDOCFLAGS:-} -Zunstable-options --default-theme=ayu --cfg docsrs" \
     cargo hack doc --workspace --feature-powerset \
         {{ if no_deps == "" { "" } else { "--no-deps" } }} \
         {{ if private == "" { "" } else { "--document-private-items" } }} \
         {{ if open == "" { "" } else { "--open" } }}
 
-# Build docs for all features and open in default browser
-doco: (doc "--no-deps" "" "--open")
+# Build docs for all features and direct dependencies and open in default browser
+doco: 
+    RUSTDOCFLAGS="${RUSTDOCFLAGS:-} -Zunstable-options --default-theme=ayu --cfg docsrs" \
+    cargo doc --all-features --no-deps --open \
+        $(cargo tree --depth 1 -e normal,dev,build --prefix none \
+          | cut -d' ' -f1 \
+          | xargs printf -- '-p %s ')
 
 # Run all checks (~local CI)
-ci: fmt clippy test doc
+ci: fmt lint doc test
     @echo "All checks passed! :)"
