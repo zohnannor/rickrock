@@ -52,7 +52,7 @@ jobs:
             - uses: Swatinem/rust-cache@v2
             - uses: taiki-e/install-action@just
             - uses: taiki-e/install-action@cargo-hack
-            - run: just clippy
+            - run: just lint
 
     test:
         runs-on: ubuntu-latest

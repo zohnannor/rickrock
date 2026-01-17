@@ -99,6 +99,6 @@ down:
     docker-compose -f docker-compose.yml \
         down --rmi=local -v
 
-# Run all checks (~local CI)
+# Run all checks (~local CI, but allows warnings)
 ci: fmt lint doc test
     @echo "All checks passed! :)"

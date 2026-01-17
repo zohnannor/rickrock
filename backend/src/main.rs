@@ -1,5 +1,7 @@
 //! TODO
 
+mod db;
+mod graphql;
 mod unused {
     //! Not actually used, for `--cfg docsrs` only.
     #[expect(
@@ -16,12 +18,12 @@ use axum::{
     routing::{get, post},
 };
 use derive_more::{Display, Error, From};
-use juniper::{EmptySubscription, RootNode, graphql_object};
 use juniper_axum::{graphql, playground};
-use sqlx::{Connection as _, postgres::PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
-use tracing::level_filters::LevelFilter;
 use tracing_subscriber::EnvFilter;
+
+use crate::graphql::{Mutation, Query, Schema};
 
 /// TODO
 #[derive(Debug, Error, Display, From)]
@@ -35,48 +37,6 @@ enum Error {
     /// TODO
     #[display("Database error: {_0}")]
     Db(#[from] sqlx::Error),
-}
-
-/// TODO
-#[derive(Debug, Default)]
-struct Query;
-
-#[graphql_object]
-impl Query {
-    /// TODO
-    fn hello_world() -> String {
-        "Hello, World!".to_owned()
-    }
-}
-
-/// TODO
-#[derive(Debug, Default)]
-
-struct Mutation;
-
-#[graphql_object]
-impl Mutation {
-    /// TODO
-    fn hello_world() -> String {
-        "Hello, World!".to_owned()
-    }
-}
-
-/// TODO
-type Schema = RootNode<Query, Mutation, EmptySubscription>;
-
-/// TODO
-struct Repository {
-    /// TODO
-    pool: sqlx::PgPool,
-}
-
-impl Repository {
-    /// TODO
-    #[expect(clippy::single_call_fn, reason = "TODO")]
-    const fn new(pool: sqlx::PgPool) -> Self {
-        Self { pool }
-    }
 }
 
 /// TODO
@@ -95,20 +55,13 @@ async fn setup() -> Result<(), Error> {
         .await?;
     tracing::info!("Connected to db!");
 
-    let repo = Repository::new(pool);
+    let db = db::Db::new(pool);
 
-    {
-        let mut conn = repo.pool.acquire().await?;
-        let mut tx = conn.begin().await?;
-
-        let result = sqlx::query!(r#"SELECT 1 + 1 AS "answer!""#)
-            .fetch_one(&mut *tx)
-            .await?;
-        tracing::info!("Answer: {}", result.answer);
-        tx.commit().await?;
-    }
-
-    let schema = Schema::new(Query, Mutation, EmptySubscription::new());
+    let schema = Schema::new(
+        Query { db: db.clone() },
+        Mutation { db: db.clone() },
+        juniper::EmptySubscription::new(),
+    );
 
     #[cfg(not(debug_assertions))]
     schema.disable_introspection();
@@ -135,11 +88,7 @@ async fn setup() -> Result<(), Error> {
 async fn main() {
     drop(dotenvy::dotenv().ok());
     tracing_subscriber::fmt()
-        .with_env_filter(
-            EnvFilter::builder()
-                .with_default_directive(LevelFilter::INFO.into())
-                .from_env_lossy(),
-        )
+        .with_env_filter(EnvFilter::builder().from_env_lossy())
         .with_file(false)
         .compact()
         .init();
