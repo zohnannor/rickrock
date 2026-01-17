@@ -89,6 +89,16 @@ doco:
           | cut -d' ' -f1 \
           | xargs printf -- '-p %s ')
 
+# Start project and its dependencies in Docker Compose development environment
+up: down
+    docker-compose -f docker-compose.yml up -d --wait
+    cargo r
+
+# Stop project and its dependencies
+down:
+    docker-compose -f docker-compose.yml \
+        down --rmi=local -v
+
 # Run all checks (~local CI)
 ci: fmt lint doc test
     @echo "All checks passed! :)"

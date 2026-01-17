@@ -7,14 +7,17 @@ rust-version = "1.92"
 [dependencies]
 axum = "0.8.8"
 derive_more = { version = "2.1.1", features = ["display", "error", "from"] }
-sqlx = { version = "0.8.6", features = ["macros", "postgres", "runtime-tokio", "time", "uuid"] }
+# needed for macros to work correctly with rust-analyzer, use next stable once released
+sqlx = { version = "0.9.0-alpha.1", features = ["macros", "postgres", "runtime-tokio", "time", "uuid"] }
 tokio = { version = "1.49.0", features = ["full"] }
 tracing = "0.1.44"
 # use plain version after `--cfg docsrs` is fixed in the next release
 juniper = { version = "0.17.0", git = "https://github.com/graphql-rust/juniper", features = ["time"] }
 juniper_axum = { version = "0.3.0", git = "https://github.com/graphql-rust/juniper" }
+dotenvy = "0.15.7"
+tracing-subscriber = { version = "0.3.22", features = ["env-filter", "tracing-log"] }
 
-# not used, but needed for `--cfg docsrs`
+# not used, but needed for `--cfg docsrs` to not crash
 [dependencies.generic-array]
 version = "0.14.9"
 
@@ -56,7 +59,6 @@ create_dir = "warn"
 dbg_macro = "warn"
 debug_assert_with_mut_call = "warn"
 decimal_literal_representation = "warn"
-default_numeric_fallback = "warn"
 default_trait_access = "warn"
 default_union_representation = "warn"
 deref_by_slicing = "warn"
@@ -160,7 +162,6 @@ match_wild_err_arm = "warn"
 match_wildcard_for_single_variants = "warn"
 maybe_infinite_iter = "warn"
 mem_forget = "warn"
-min_ident_chars = "warn"
 mismatching_type_param_order = "warn"
 missing_assert_message = "warn"
 missing_asserts_for_indexing = "warn"
@@ -173,7 +174,7 @@ missing_panics_doc = "warn"
 mixed_read_write_in_expression = "warn"
 module_name_repetitions = "warn"
 modulo_arithmetic = "warn"
-# multiple_crate_versions = "warn"              # false-positives
+multiple_crate_versions = "allow"                  # not worth it?
 multiple_inherent_impl = "warn"
 multiple_unsafe_ops_per_block = "warn"
 must_use_candidate = "warn"
@@ -254,7 +255,6 @@ single_char_pattern = "warn"
 single_match_else = "warn"
 single_option_map = "warn"
 stable_sort_primitive = "warn"
-std_instead_of_alloc = "warn"
 std_instead_of_core = "warn"
 str_split_at_newline = "warn"
 str_to_string = "warn"
@@ -372,7 +372,7 @@ unused_lifetimes = "warn"
 unused_macro_rules = "warn"
 unused_qualifications = "warn"
 unused_results = "warn"
-# variant_size_differences = "warn" # false-positives 
+# variant_size_differences = "warn" # false-positives
 
 [lints.rustdoc]
 bare_urls = "warn"

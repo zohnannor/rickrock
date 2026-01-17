@@ -1,5 +1,6 @@
 allowed-idents-below-min-chars = ["..", "f"]
 check-private-items = true
+cognitive-complexity-threshold = 80
 missing-docs-allow-unused = true
 module-item-order-groupings = [
     [ # changed:
