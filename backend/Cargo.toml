@@ -12,10 +12,14 @@ sqlx = { version = "0.9.0-alpha.1", features = ["macros", "postgres", "runtime-t
 tokio = { version = "1.49.0", features = ["full"] }
 tracing = "0.1.44"
 # use plain version after `--cfg docsrs` is fixed in the next release
-juniper = { version = "0.17.0", git = "https://github.com/graphql-rust/juniper", features = ["time"] }
+juniper = { version = "0.17.0", git = "https://github.com/graphql-rust/juniper", features = ["time", "uuid"] }
 juniper_axum = { version = "0.3.0", git = "https://github.com/graphql-rust/juniper" }
 dotenvy = "0.15.7"
 tracing-subscriber = { version = "0.3.22", features = ["env-filter", "tracing-log"] }
+uuid = { version = "1.19.0", features = ["v4", "v7"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"
 
 # not used, but needed for `--cfg docsrs` to not crash
 [dependencies.generic-array]
@@ -139,7 +143,6 @@ large_stack_arrays = "warn"
 large_stack_frames = "warn"
 large_types_passed_by_value = "warn"
 let_underscore_must_use = "warn"
-let_underscore_untyped = "warn"
 linkedlist = "warn"
 literal_string_with_formatting_args = "warn"
 little_endian_bytes = "warn"

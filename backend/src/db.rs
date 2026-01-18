@@ -1,5 +1,9 @@
 //! TODO
 
+use derive_more::{Display, Error};
+
+use crate::user::User;
+
 /// TODO
 #[derive(Debug, Clone)]
 pub(crate) struct Db {
@@ -15,4 +19,14 @@ impl Db {
     }
 }
 
-impl Db {}
+pub(crate) trait Repository {
+    type Error;
+
+    fn insert_user(
+        &self,
+        user: User,
+    ) -> impl Future<Output = Result<bool, Self::Error>> + Send;
+}
+
+#[derive(Debug, Display, Error, PartialEq, Eq)]
+pub(crate) enum Error {}
