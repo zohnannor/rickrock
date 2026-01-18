@@ -5,18 +5,27 @@ edition = "2024"
 rust-version = "1.92"
 
 [dependencies]
-axum = "0.8.8"
-derive_more = { version = "2.1.1", features = ["display", "error", "from"] }
-# needed for macros to work correctly with rust-analyzer, use next stable once released
-sqlx = { version = "0.9.0-alpha.1", features = ["macros", "postgres", "runtime-tokio", "time", "uuid"] }
-tokio = { version = "1.49.0", features = ["full"] }
-tracing = "0.1.44"
+axum = { version = "0.8.8", default-features = false, features = ["http1", "tokio"] }
+derive_more = { version = "2.1.1", default-features = false, features = ["display", "error", "from"] }
+dotenvy = { version = "0.15.7", default-features = false }
 # use plain version after `--cfg docsrs` is fixed in the next release
-juniper = { version = "0.17.0", git = "https://github.com/graphql-rust/juniper", features = ["time", "uuid"] }
-juniper_axum = { version = "0.3.0", git = "https://github.com/graphql-rust/juniper" }
-dotenvy = "0.15.7"
-tracing-subscriber = { version = "0.3.22", features = ["env-filter", "tracing-log"] }
-uuid = { version = "1.19.0", features = ["v4", "v7"] }
+juniper = { version = "0.17.0", git = "https://github.com/graphql-rust/juniper", default-features = false, features = [
+    "time",
+    "uuid",
+] }
+juniper_axum = { version = "0.3.0", git = "https://github.com/graphql-rust/juniper", default-features = false }
+# needed for macros to work correctly with rust-analyzer, use next stable once released
+sqlx = { version = "0.9.0-alpha.1", default-features = false, features = [
+    "macros",
+    "postgres",
+    "runtime-tokio",
+    "time",
+    "uuid",
+] }
+tokio = { version = "1.49.0", default-features = false, features = ["rt-multi-thread"] }
+tracing = { version = "0.1.44", default-features = false }
+tracing-subscriber = { version = "0.3.22", default-features = false, features = ["env-filter", "fmt", "tracing-log"] }
+uuid = { version = "1.19.0", default-features = false, features = ["v4", "v7"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.1"
@@ -25,12 +34,15 @@ pretty_assertions = "1.4.1"
 [dependencies.generic-array]
 version = "0.14.9"
 
+# not used, but needed to only have one version of dependencies
+# [dependencies.hashbrown]
+# version = "^0.16"
+
 [lints.clippy]
 absolute_paths = "warn"
 alloc_instead_of_core = "warn"
 allow_attributes = "warn"
 allow_attributes_without_reason = "warn"
-arbitrary_source_item_ordering = "warn"
 arithmetic_side_effects = "warn"
 as_pointer_underscore = "warn"
 as_ptr_cast_mut = "warn"
@@ -177,7 +189,7 @@ missing_panics_doc = "warn"
 mixed_read_write_in_expression = "warn"
 module_name_repetitions = "warn"
 modulo_arithmetic = "warn"
-multiple_crate_versions = "allow"                  # not worth it?
+# multiple_crate_versions = "allow" # not worth it
 multiple_inherent_impl = "warn"
 multiple_unsafe_ops_per_block = "warn"
 must_use_candidate = "warn"
@@ -363,7 +375,6 @@ trivial_casts = "warn"
 trivial_numeric_casts = "warn"
 unit_bindings = "warn"
 unnameable_types = "warn"
-unreachable_pub = "warn"
 unsafe_attr_outside_unsafe = "warn"
 unsafe_code = "warn"
 unsafe_op_in_unsafe_fn = "warn"

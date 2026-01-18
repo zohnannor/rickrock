@@ -2,11 +2,9 @@
 
 use derive_more::{Display, Error};
 
-use crate::user::User;
-
 /// TODO
 #[derive(Debug, Clone)]
-pub(crate) struct Db {
+pub struct Db {
     /// TODO
     pool: sqlx::PgPool,
 }
@@ -19,14 +17,22 @@ impl Db {
     }
 }
 
-pub(crate) trait Repository {
+/// TODO
+pub trait Repository<T> {
+    /// TODO
     type Error;
 
-    fn insert_user(
+    /// TODO
+    fn insert(
         &self,
-        user: User,
+        entity: T,
     ) -> impl Future<Output = Result<bool, Self::Error>> + Send;
 }
 
+#[expect(
+    clippy::error_impl_error,
+    reason = "intended to be used as `db::Error`"
+)]
+/// TODO
 #[derive(Debug, Display, Error, PartialEq, Eq)]
-pub(crate) enum Error {}
+pub enum Error {}

@@ -3,21 +3,16 @@
 mod create_user;
 mod repo;
 
+/// TODO
 #[derive(Debug, Clone)]
-pub(crate) struct Service<R> {
+pub struct Service<R> {
+    /// TODO
     repo: R,
 }
 
 impl<R> Service<R> {
-    pub(crate) fn new(repo: R) -> Self {
+    /// TODO
+    pub(crate) const fn new(repo: R) -> Self {
         Self { repo }
     }
-}
-
-pub(crate) trait UserService {
-    type Error;
-
-    fn create_user(
-        &self,
-    ) -> impl Future<Output = Result<bool, Self::Error>> + Send;
 }

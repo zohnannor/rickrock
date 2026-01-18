@@ -1,7 +1,15 @@
 //! TODO
 
-mod db;
-mod graphql;
+#![expect(unstable_features, reason = "using nightly features")]
+#![feature(sync_nonpoison, nonpoison_mutex)]
+#![cfg_attr(
+    test,
+    expect(clippy::missing_panics_doc, reason = "tests are intended to panic")
+)]
+
+mod api;
+mod domain;
+mod infra;
 mod service;
 mod unused {
     //! Unused dependencies
@@ -15,7 +23,6 @@ mod unused {
     use generic_array as _;
     use tracing_subscriber as _;
 }
-mod user;
 
 use std::{env, io, sync::Arc};
 
@@ -30,7 +37,8 @@ use sqlx::postgres::PgPoolOptions;
 use tokio::net::TcpListener;
 
 use crate::{
-    graphql::{Mutation, Query},
+    api::graphql::{Mutation, Query},
+    infra::db,
     service::Service,
 };
 

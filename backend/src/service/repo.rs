@@ -1,40 +1,44 @@
+//! TODO
+
 use crate::{
     db::{self, Repository},
-    user::User,
+    domain::user::User,
 };
 
-impl Repository for db::Db {
+impl Repository<User> for db::Db {
     type Error = db::Error;
 
-    async fn insert_user(&self, _user: User) -> Result<bool, Self::Error> {
+    async fn insert(&self, _user: User) -> Result<bool, Self::Error> {
         Ok(true)
     }
 }
 
 #[cfg(test)]
-pub(crate) mod mock {
-    use std::{
-        collections::HashMap,
-        sync::{Arc, Mutex},
-    };
+pub mod mock {
+    use std::sync::{Arc, nonpoison::Mutex};
 
-    use uuid::Uuid;
+    use super::*;
 
-    use crate::{
-        db::{self, Repository},
-        user::User,
-    };
-
-    #[derive(Debug, Default, Clone)]
-    pub(crate) struct MockRepo {
-        users: Arc<Mutex<HashMap<Uuid, User>>>,
+    #[derive(Debug, Clone)]
+    pub struct Repo<T> {
+        users: Arc<Mutex<Vec<T>>>,
     }
 
-    impl Repository for MockRepo {
+    // Implemented manually to avoid implicit `T: Default` bound.
+    impl<T> Default for Repo<T> {
+        fn default() -> Self {
+            Self { users: Arc::default() }
+        }
+    }
+
+    impl<T> Repository<T> for Repo<T>
+    where
+        T: Send,
+    {
         type Error = db::Error;
 
-        async fn insert_user(&self, user: User) -> Result<bool, Self::Error> {
-            let _ = self.users.lock().unwrap().insert(user.id.into(), user);
+        async fn insert(&self, entity: T) -> Result<bool, Self::Error> {
+            self.users.lock().push(entity);
             Ok(true)
         }
     }

@@ -1,26 +1,32 @@
+//! TODO
+
 use derive_more::{Display, Error, From};
 
 use crate::{
-    db::{self, Repository},
-    service::{Service, UserService},
-    user::User,
+    api::UserService,
+    domain::user::User,
+    infra::db::{self, Repository},
+    service::Service,
 };
 
 impl<R> UserService for Service<R>
 where
-    R: Repository<Error = db::Error> + Sync,
+    R: Repository<User, Error = db::Error> + Sync,
 {
-    type Error = Error;
+    type Error = ExecutionError;
 
     #[inline]
-    async fn create_user(&self) -> Result<bool, Error> {
+    async fn create_user(&self) -> Result<bool, ExecutionError> {
         let user = User::new();
-        Ok(self.repo.insert_user(user).await?)
+        Ok(self.repo.insert(user).await?)
     }
 }
 
+/// TODO
 #[derive(Debug, Display, Error, From, PartialEq, Eq)]
-pub(crate) enum Error {
+pub enum ExecutionError {
+    /// TODO
+    #[display("{_0}")]
     Repo(#[from] db::Error),
 }
 
@@ -29,11 +35,11 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::service::repo::mock::MockRepo;
+    use crate::service::repo::mock;
 
     #[tokio::test]
     async fn creates_user() {
-        let service = Service::new(MockRepo::default());
+        let service = Service::new(mock::Repo::default());
 
         let res = service.create_user().await;
 
