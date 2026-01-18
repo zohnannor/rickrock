@@ -1,4 +1,4 @@
-//! TODO
+//! Main entry point of the app.
 
 use tracing_subscriber::EnvFilter;
 
@@ -20,11 +20,7 @@ mod unused {
     use uuid as _;
 }
 
-/// TODO
-///
-/// # Panics
-///
-/// # Errors
+/// Main entry point of the app.
 #[tokio::main]
 async fn main() {
     drop(dotenvy::dotenv().ok());

@@ -1,53 +1,74 @@
-//! TODO
+//! GraphQL API schemas and types.
 
 use derive_more::{From, Into};
-use juniper::{GraphQLObject, GraphQLScalar, graphql_object};
+use juniper::{
+    FieldError, GraphQLObject, GraphQLScalar, IntoFieldError, Value,
+    graphql_object,
+};
 use uuid::Uuid;
 
 use crate::api::UserService;
 
-/// TODO
+/// Unique identifier of a [`User`].
 #[derive(Debug, Clone, Copy, From, Into, GraphQLScalar)]
 #[graphql(transparent)]
-pub struct Id(pub(crate) Uuid);
+pub struct Id(pub Uuid);
 
-/// TODO
+#[expect(dead_code, reason = "WIP")]
+/// A [`User`] of a platform.
 #[derive(GraphQLObject)]
 pub struct User {
-    /// TODO
-    pub(crate) id: Id,
+    /// Unique ID of this [`User`].
+    pub id: Id,
 }
 
-/// TODO
+/// Root of GraphQL API queries.
 #[derive(Debug)]
 pub struct Query<S> {
-    /// TODO
-    pub(crate) service: S,
+    /// Service of GraphQL API queries.
+    pub _service: S,
 }
 
 #[graphql_object]
 impl<S> Query<S> {
-    /// TODO
+    /// Returns a constant string.
     fn hello_world() -> String {
         "Hello, World!".to_owned()
     }
 }
 
-/// TODO
+/// Root of GraphQL API mutations.
 #[derive(Debug)]
 
 pub struct Mutation<S> {
-    /// TODO
-    pub(crate) service: S,
+    /// Service of GraphQL API mutations.
+    pub service: S,
 }
 
+#[expect(
+    clippy::single_call_fn,
+    reason = "GraphQL API resolvers are called by the server"
+)]
 #[graphql_object]
 impl<S> Mutation<S>
 where
-    S: UserService<Error: ToString> + Sync,
+    S: UserService + Sync,
+    Error: From<S::Error>,
 {
-    /// TODO
-    async fn create_user(&self) -> Result<bool, String> {
-        self.service.create_user().await.map_err(|e| e.to_string())
+    /// Creates a new [`User`] of a platform.
+    async fn create_user(&self) -> Result<bool, Error> {
+        Ok(self.service.create_user().await?)
+    }
+}
+
+/// Error produced by GraphQL API resolvers.
+pub struct Error {
+    /// Error message.
+    pub message: String,
+}
+
+impl<S> IntoFieldError<S> for Error {
+    fn into_field_error(self) -> FieldError<S> {
+        FieldError::new(self.message, Value::Null)
     }
 }

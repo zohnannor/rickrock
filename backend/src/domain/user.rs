@@ -1,30 +1,23 @@
-//! TODO
+//! Domain model of a [`User`] of a platform.
 
 use derive_more::{From, Into};
 use uuid::Uuid;
 
-/// TODO
+/// Domain model of a [`User`] of a platform.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct User {
-    /// TODO
+    /// Unique ID of this [`User`].
     pub id: Id,
 }
 
-/// TODO
+/// Unique identifier of a [`User`].
 #[derive(Debug, Clone, Copy, From, Into, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Id(Uuid);
 
 impl Id {
-    /// TODO
-    fn new() -> Self {
+    /// Creates a new unique [`Id`].
+    pub(crate) fn new() -> Self {
         Self(Uuid::now_v7())
-    }
-}
-
-impl User {
-    /// TODO
-    pub fn new() -> Self {
-        Self { id: Id::new() }
     }
 }
 
@@ -33,6 +26,13 @@ mod tests {
     use pretty_assertions::assert_ne;
 
     use super::*;
+
+    impl User {
+        /// Creates a new unique [`User`] for testing purposes.
+        fn new() -> Self {
+            Self { id: Id::new() }
+        }
+    }
 
     #[test]
     fn new_user_has_unique_id() {
@@ -44,7 +44,7 @@ mod tests {
 }
 
 mod graphql {
-    //! TODO
+    //! Conversions between [`domain`](crate::domain) and [`graphql`] types.
 
     use super::{Id, User};
     use crate::api::graphql;

@@ -1,12 +1,11 @@
-//! TODO
+//! [`Repository`] of a [`Service`].
+//!
+//! [`Service`]: crate::service::Service
 
-use crate::{
-    db::{self, Repository},
-    domain::user::User,
-};
+use crate::{domain::user::User, infra::Repository, storage};
 
-impl Repository<User> for db::Db {
-    type Error = db::Error;
+impl<DB: Sync> Repository<User> for storage::Storage<DB> {
+    type Error = storage::Error;
 
     async fn insert(&self, _user: User) -> Result<bool, Self::Error> {
         Ok(true)
@@ -18,10 +17,18 @@ pub mod mock {
     use std::sync::{Arc, nonpoison::Mutex};
 
     use super::*;
+    use crate::infra::Transaction;
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug)]
     pub struct Repo<T> {
         users: Arc<Mutex<Vec<T>>>,
+    }
+
+    // Implemented manually to avoid implicit `T: Default` bound.
+    impl<T> Clone for Repo<T> {
+        fn clone(&self) -> Self {
+            Self { users: Arc::clone(&self.users) }
+        }
     }
 
     // Implemented manually to avoid implicit `T: Default` bound.
@@ -35,11 +42,23 @@ pub mod mock {
     where
         T: Send,
     {
-        type Error = db::Error;
+        type Error = storage::Error;
 
         async fn insert(&self, entity: T) -> Result<bool, Self::Error> {
             self.users.lock().push(entity);
             Ok(true)
+        }
+    }
+
+    impl<T> Transaction for Repo<T>
+    where
+        T: Send,
+    {
+        type Transacted = Self;
+        type Error = storage::Error;
+
+        async fn tx(&self) -> Result<Self::Transacted, Self::Error> {
+            Ok(self.clone())
         }
     }
 }

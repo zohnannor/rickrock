@@ -1,4 +1,4 @@
-//! TODO
+//! GraphQL API server.
 
 #![expect(unstable_features, reason = "using nightly features")]
 #![feature(sync_nonpoison, nonpoison_mutex)]
@@ -38,37 +38,38 @@ use tokio::net::TcpListener;
 
 use crate::{
     api::graphql::{Mutation, Query},
-    infra::db,
+    infra::storage::{self, Storage},
     service::Service,
 };
 
-/// TODO
+/// Error produced by the server.
 #[derive(Debug, Error, Display, From)]
 #[non_exhaustive]
 pub enum ServerError {
-    /// TODO
+    /// I/O error.
     #[display("IO error: {_0}")]
     Io(#[from] io::Error),
-    /// TODO
+    /// Environment variable error.
     #[display("Env error: {_0}")]
     Env(#[from] env::VarError),
-    /// TODO
+    /// Database error.
     #[display("Database error: {_0}")]
     Db(#[from] sqlx::Error),
 }
 
-/// TODO
+/// GraphQL API schema.
 type Schema = RootNode<
-    Query<Service<db::Db>>,
-    Mutation<Service<db::Db>>,
+    Query<Service<Storage<sqlx::PgPool>>>,
+    Mutation<Service<Storage<sqlx::PgPool>>>,
     EmptySubscription,
 >;
 
-/// TODO
-///
-/// # Panics
+/// Initializes the dependencies of the server and starts it, listening on
+/// `0.0.0.0:3000`.
 ///
 /// # Errors
+///
+/// If any of the dependencies fails to initialize.
 #[inline]
 pub async fn setup() -> Result<(), ServerError> {
     let listener = TcpListener::bind("0.0.0.0:3000").await?;
@@ -80,12 +81,12 @@ pub async fn setup() -> Result<(), ServerError> {
         .await?;
     tracing::info!("Connected to db!");
 
-    let db = db::Db::new(pool);
+    let db = Storage::new(pool);
 
     let service = Service::new(db);
 
     let schema = Schema::new(
-        Query { service: service.clone() },
+        Query { _service: service.clone() },
         Mutation { service: service.clone() },
         EmptySubscription::new(),
     );
