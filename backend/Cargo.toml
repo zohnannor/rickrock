@@ -23,8 +23,13 @@ sqlx = { version = "0.9.0-alpha.1", default-features = false, features = [
     "uuid",
 ] }
 tokio = { version = "1.49.0", default-features = false, features = ["rt-multi-thread"] }
-tracing = { version = "0.1.44", default-features = false }
-tracing-subscriber = { version = "0.3.22", default-features = false, features = ["env-filter", "fmt", "tracing-log"] }
+tracing = { version = "0.1.44", default-features = false, features = ["attributes"] }
+tracing-subscriber = { version = "0.3.22", default-features = false, features = [
+    "ansi",
+    "env-filter",
+    "fmt",
+    "tracing-log",
+] }
 uuid = { version = "1.19.0", default-features = false, features = ["v4", "v7"] }
 
 [dev-dependencies]

@@ -1,7 +1,7 @@
 //! GraphQL API server.
 
 #![expect(unstable_features, reason = "using nightly features")]
-#![feature(sync_nonpoison, nonpoison_mutex)]
+#![feature(sync_nonpoison, nonpoison_mutex, never_type)]
 #![cfg_attr(
     test,
     expect(clippy::missing_panics_doc, reason = "tests are intended to panic")
