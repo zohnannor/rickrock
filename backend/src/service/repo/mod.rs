@@ -2,40 +2,17 @@
 //!
 //! [`Service`]: crate::service::Service
 
-use crate::{domain::User, infra::Repository, storage};
-
-impl<DB: Sync> Repository<User> for storage::Storage<DB> {
-    type Error = storage::Error;
-
-    async fn insert(&self, _user: User) -> Result<bool, Self::Error> {
-        Ok(true)
-    }
-}
+mod user;
 
 #[cfg(test)]
 pub mod mock {
     use std::sync::{Arc, nonpoison::Mutex};
 
-    use super::*;
-    use crate::infra::Transaction;
+    use crate::infra::{Repository, Transaction, storage};
 
-    #[derive(Debug)]
+    #[derive(Debug, Default, Clone)]
     pub struct Repo {
         users: Arc<Mutex<Vec<()>>>,
-    }
-
-    // Implemented manually to avoid implicit `T: Default` bound.
-    impl Clone for Repo {
-        fn clone(&self) -> Self {
-            Self { users: Arc::clone(&self.users) }
-        }
-    }
-
-    // Implemented manually to avoid implicit `T: Default` bound.
-    impl Default for Repo {
-        fn default() -> Self {
-            Self { users: Arc::default() }
-        }
     }
 
     impl<T> Repository<T> for Repo

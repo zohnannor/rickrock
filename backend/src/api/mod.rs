@@ -1,6 +1,8 @@
 //! GraphQL API services.
 
-pub mod graphql;
+use crate::{
+    domain,
+    service::command::{CreateUser, Executor},
+};
 
-#[cfg(doc)]
-use crate::api::graphql::User;
+pub mod graphql;

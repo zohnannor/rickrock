@@ -7,7 +7,10 @@ use juniper::{
 };
 use uuid::Uuid;
 
-use crate::api::UserService;
+use crate::{
+    domain,
+    service::command::{CreateUser, Executor},
+};
 
 /// Unique identifier of a [`User`].
 #[derive(Debug, Clone, Copy, From, Into, GraphQLScalar)]
@@ -52,12 +55,13 @@ pub struct Mutation<S> {
 #[graphql_object]
 impl<S> Mutation<S>
 where
-    S: UserService + Sync,
-    Error: From<S::Error>,
+    Self: Sync,
+    S: Executor<domain::User, CreateUser, Output = bool>,
+    Error: From<<S as Executor<domain::User, CreateUser>>::Error>,
 {
     /// Creates a new [`User`] of a platform.
     async fn create_user(&self) -> Result<bool, Error> {
-        Ok(self.service.create_user().await?)
+        Ok(self.service.run(CreateUser).await?)
     }
 }
 

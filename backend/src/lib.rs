@@ -101,7 +101,7 @@ pub async fn setup() -> Result<(), ServerError> {
         .layer(Extension(Arc::new(schema)));
 
     tracing::info!("Starting server...");
-    tracing::info!("Listening on {}", listener.local_addr()?);
+    tracing::info!("Listening on http://{}", listener.local_addr()?);
     axum::serve(listener, router).await?;
 
     Ok(())
